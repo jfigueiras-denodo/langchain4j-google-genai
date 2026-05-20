@@ -9,6 +9,7 @@
     </parent>
 
     <artifactId>langchain4j-google-genai</artifactId>
+    <version>1.15.0-denodo</version>
     <name>LangChain4j :: Integration :: Google GenAI</name>
 
     <properties>
