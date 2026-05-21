@@ -129,7 +129,6 @@ public class GoogleGenAiStreamingChatModel implements StreamingChatModel {
 
                 StringBuilder textBuilder = new StringBuilder();
                 List<ToolExecutionRequest> toolRequests = new ArrayList<>();
-                Map<String, Object> attributes = new HashMap<>();
                 TokenUsage tokenUsage = new TokenUsage();
                 FinishReason finishReason = null;
                 GenerateContentResponse lastChunk = null;
@@ -161,10 +160,6 @@ public class GoogleGenAiStreamingChatModel implements StreamingChatModel {
                         }
                     }
 
-                    if(aiMessage.attributes() != null && !aiMessage.attributes().isEmpty()) {
-                        attributes.putAll(aiMessage.attributes());
-                    }
-
                     if (partialResponse.tokenUsage() != null) {
                         tokenUsage = partialResponse.tokenUsage();
                     }
@@ -174,18 +169,13 @@ public class GoogleGenAiStreamingChatModel implements StreamingChatModel {
                     }
                 }
 
-                AiMessage.Builder finalAiMessageBuilder;
-
+                AiMessage finalAiMessage;
                 if (!toolRequests.isEmpty() && textBuilder.length() > 0) {
-                    finalAiMessageBuilder = new AiMessage(textBuilder.toString(), toolRequests).toBuilder();
+                    finalAiMessage = new AiMessage(textBuilder.toString(), toolRequests);
                 } else if (!toolRequests.isEmpty()) {
-                    finalAiMessageBuilder = AiMessage.from(toolRequests).toBuilder();
+                    finalAiMessage = AiMessage.from(toolRequests);
                 } else {
-                    finalAiMessageBuilder = AiMessage.from(textBuilder.toString()).toBuilder();
-                }
-
-                if (!attributes.isEmpty()) {
-                    finalAiMessageBuilder.attributes(attributes);
+                    finalAiMessage = AiMessage.from(textBuilder.toString());
                 }
 
                 GoogleGenAiChatResponseMetadata metadata = GoogleGenAiChatResponseMetadata.builder()
@@ -199,7 +189,7 @@ public class GoogleGenAiStreamingChatModel implements StreamingChatModel {
                         .build();
 
                 ChatResponse finalChatResponse = ChatResponse.builder()
-                        .aiMessage(finalAiMessageBuilder.build())
+                        .aiMessage(finalAiMessage)
                         .metadata(metadata)
                         .build();
 
